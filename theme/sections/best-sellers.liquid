@@ -69,12 +69,21 @@
 							{% endif %}
 							{% comment %} Product Actions {% endcomment %}
 							<div class="best-sellers__actions">
+								{% comment %} Wishlist {% endcomment %}
 								<a class="best-sellers__action best-sellers__action--wishlist" href="#" data-product-title="{{ product.title | escape }}">
 									{% render 'icon-wishlist' %}
 								</a>
-								<a class="best-sellers__action best-sellers__action--quick-view" href="#">
+								{% comment %} Add to Cart {% endcomment %}
+								{% assign first_available_variant = product.selected_or_first_available_variant %}
+								<button
+									type="button"
+									class="best-sellers__action best-sellers__action--quick-view"
+									aria-label="Add to cart"
+									data-variant-id="{{ first_available_variant.id }}"
+									{% unless product.available %}disabled{% endunless %}
+								>
 									{% render 'icon-quick-view' %}
-								</a>
+								</button>
 							</div>
 							{% comment %} Product info {% endcomment %}
 							<div class="best-sellers__info">
@@ -119,6 +128,7 @@
 		var items = bestSellersSection.querySelectorAll('.best-sellers__item');
 		var panels = bestSellersSection.querySelectorAll('.best-sellers__panel');
 		var wishlistButtons = bestSellersSection.querySelectorAll('.best-sellers__action--wishlist');
+		var quickViewButtons = bestSellersSection.querySelectorAll('.best-sellers__action--quick-view');
 		var wishlistModal = bestSellersSection.querySelector('.best-sellers__wishlist-modal');
 		var wishlistProduct = bestSellersSection.querySelector('.best-sellers__wishlist-product');
 		var wishlistCloseButtons = bestSellersSection.querySelectorAll('[data-wishlist-close]');
@@ -164,17 +174,45 @@
 		}
 
 		// Open wishlist
-		wishlistButtons.forEach(function(button) {
-			button.addEventListener('click', function(event) {
+		wishlistButtons.forEach(function(cta) {
+			cta.addEventListener('click', function(event) {
 				event.preventDefault();
 				openWishlistModal(this.getAttribute('data-product-title'));
 			});
 		});
 
 		// Close wishlist
-		wishlistCloseButtons.forEach(function(button) {
-			button.addEventListener('click', function() {
+		wishlistCloseButtons.forEach(function(cta) {
+			cta.addEventListener('click', function() {
 				closeWishlistModal();
+			});
+		});
+
+		// Add to cart
+		quickViewButtons.forEach(function(cta) {
+			cta.addEventListener('click', function() {
+				var variantId = this.getAttribute('data-variant-id');
+				if (!variantId || this.disabled) return;
+
+				this.disabled = true;
+				this.classList.add('is-loading');
+
+				fetch('{{ routes.cart_add_url }}.js', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+						'Accept': 'application/json'
+					},
+					body: JSON.stringify({
+						id: Number(variantId),
+						quantity: 1
+					})
+				}).catch(function(error) {
+					console.error(error);
+				}).finally(function() {
+					cta.disabled = false;
+					cta.classList.remove('is-loading');
+				});
 			});
 		});
 	})();
@@ -305,15 +343,26 @@
 		background: #fff;
 		border: 1px #dcdcdc solid;
 		border-radius: 8px;
+		cursor: pointer;
 		height: 40px;
 		display: flex;
 		justify-content: center;
 		margin-bottom: 4px;
+		padding: 0;
 		width: 40px;
 	}
 
 	.best-sellers__action:hover {
 		background-color: #dcdcdc;
+	}
+
+	.best-sellers__action:disabled {
+		cursor: not-allowed;
+		opacity: 0.5;
+	}
+
+	.best-sellers__action:disabled:hover {
+		background-color: #fff;
 	}
 
 	.best-sellers__info {
