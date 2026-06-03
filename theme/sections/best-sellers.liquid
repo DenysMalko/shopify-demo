@@ -69,7 +69,7 @@
 							{% endif %}
 							{% comment %} Product Actions {% endcomment %}
 							<div class="best-sellers__actions">
-								<a class="best-sellers__action best-sellers__action--wishlist" href="#">
+								<a class="best-sellers__action best-sellers__action--wishlist" href="#" data-product-title="{{ product.title | escape }}">
 									{% render 'icon-wishlist' %}
 								</a>
 								<a class="best-sellers__action best-sellers__action--quick-view" href="#">
@@ -94,6 +94,19 @@
 			</div>
 		</div>
   	</div>
+
+	{% comment %} Wishlist block {% endcomment %}
+	<div class="best-sellers__wishlist-modal" aria-hidden="true">
+		<div class="best-sellers__wishlist-overlay" data-wishlist-close>&nbsp;</div>
+		<div class="best-sellers__wishlist-popup" role="dialog" aria-modal="true">
+			<button type="button" class="best-sellers__wishlist-close" aria-label="Close" data-wishlist-close>
+				{% render 'icon-close' %}
+			</button>
+			<p class="best-sellers__wishlist-message">
+				<span class="best-sellers__wishlist-product"></span> has been added to the your wishlist.
+			</p>
+		</div>
+	</div>
 </section>
 
 {% comment %} Scripts {% endcomment %}
@@ -105,6 +118,29 @@
 		// Vars
 		var items = bestSellersSection.querySelectorAll('.best-sellers__item');
 		var panels = bestSellersSection.querySelectorAll('.best-sellers__panel');
+		var wishlistButtons = bestSellersSection.querySelectorAll('.best-sellers__action--wishlist');
+		var wishlistModal = bestSellersSection.querySelector('.best-sellers__wishlist-modal');
+		var wishlistProduct = bestSellersSection.querySelector('.best-sellers__wishlist-product');
+		var wishlistCloseButtons = bestSellersSection.querySelectorAll('[data-wishlist-close]');
+
+		// Open wishlist modal
+		function openWishlistModal(productTitle) {
+			if (!wishlistModal || !wishlistProduct) return;
+
+			wishlistProduct.textContent = productTitle;
+			wishlistModal.classList.add('is-active');
+			wishlistModal.setAttribute('aria-hidden', 'false');
+			document.body.classList.add('best-sellers-modal-open');
+		}
+
+		// Close wishlist modal
+		function closeWishlistModal() {
+			if (!wishlistModal) return;
+
+			wishlistModal.classList.remove('is-active');
+			wishlistModal.setAttribute('aria-hidden', 'true');
+			document.body.classList.remove('best-sellers-modal-open');
+		}
 
 		// Set active panel
 		function activatePanel(id) {
@@ -126,6 +162,21 @@
 				});
 			});
 		}
+
+		// Open wishlist
+		wishlistButtons.forEach(function(button) {
+			button.addEventListener('click', function(event) {
+				event.preventDefault();
+				openWishlistModal(this.getAttribute('data-product-title'));
+			});
+		});
+
+		// Close wishlist
+		wishlistCloseButtons.forEach(function(button) {
+			button.addEventListener('click', function() {
+				closeWishlistModal();
+			});
+		});
 	})();
 </script>
 {% comment %} Scripts END {% endcomment %}
@@ -314,6 +365,74 @@
 		text-decoration: line-through;
 	}
 
+	/* Wishlist */
+	.best-sellers-modal-open {
+		overflow: hidden;
+	}
+	
+	.best-sellers__wishlist-modal {
+		display: none;
+	}
+
+	.best-sellers__wishlist-modal.is-active {
+		align-items: center;
+		display: flex;
+		inset: 0;
+		justify-content: center;
+		padding: 16px;
+		position: fixed;
+		z-index: 99;
+	}
+
+	.best-sellers__wishlist-overlay {
+		background: rgba(0, 0, 0, 0.5);
+		inset: 0;
+		position: fixed;
+	}
+
+	.best-sellers__wishlist-popup {
+		background: #fff;
+		border-radius: 16px;
+		max-width: 450px;
+		padding: 64px 32px 32px;
+		position: relative;
+		width: 100%;
+		z-index: 1;
+	}
+
+	.best-sellers__wishlist-close {
+		align-items: center;
+		background: #fff;
+		border: 1px #dcdcdc solid;
+		border-radius: 8px;
+		cursor: pointer;
+		display: flex;
+		height: 40px;
+		justify-content: center;
+		padding: 8px;
+		position: absolute;
+		right: 16px;
+		top: 16px;
+		width: 40px;
+	}
+
+	.best-sellers__wishlist-close:hover {
+		background-color: #dcdcdc;
+	}
+
+	.best-sellers__wishlist-message {
+		color: #000;
+		font-size: 18px;
+		font-weight: 500;
+		line-height: 26px;
+		margin: 0;
+		text-align: center;
+	}
+
+	.best-sellers__wishlist-product {
+		font-weight: 800;
+	}
+
 	/* Desktop styles */
   	@media screen and (min-width: 750px) {
     	.best-sellers__inner {
@@ -377,6 +496,12 @@
 			flex-direction: row;
 			padding: 24px 32px;
 			width: calc(100% - 32px);
+		}
+
+		.best-sellers__wishlist-close {
+			height: 48px;
+			padding: 12px;
+			width: 48px;
 		}
   	}
 {% endstylesheet %}
