@@ -58,6 +58,45 @@
         "show_text_below": true
       }
     },
+    "best_sellers_EE8YCR": {
+      "type": "best-sellers",
+      "blocks": {
+        "collection_8NMnaq": {
+          "type": "collection",
+          "settings": {
+            "collection": "hydrogen",
+            "collection_title": "",
+            "product": ""
+          }
+        },
+        "collection_PD4jMV": {
+          "type": "collection",
+          "settings": {
+            "collection": "automated-collection",
+            "collection_title": "Mantra Rings",
+            "product": "the-videographer-snowboard"
+          }
+        },
+        "collection_xEc3de": {
+          "type": "collection",
+          "settings": {
+            "collection": "automated-collection",
+            "collection_title": "CharityBands®",
+            "product": "the-3p-fulfilled-snowboard"
+          }
+        }
+      },
+      "block_order": [
+        "collection_xEc3de",
+        "collection_PD4jMV",
+        "collection_8NMnaq"
+      ],
+      "name": "Best Sellers",
+      "settings": {
+        "section_label": "Best Sellers",
+        "title": "Trending Products"
+      }
+    },
     "featured_collection": {
       "type": "featured-collection",
       "settings": {
@@ -166,6 +205,7 @@
   },
   "order": [
     "6a3bb789-ce10-45f5-ae67-e2063ef8c76b",
+    "best_sellers_EE8YCR",
     "featured_collection",
     "f1552b18-6017-4231-810d-74e61da22c37",
     "38cdf60f-e431-43b5-aac3-7e6215447d67"
