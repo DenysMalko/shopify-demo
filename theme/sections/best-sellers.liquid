@@ -91,8 +91,12 @@
 									<a href="{{ product.url }}">{{ product.title }}</a>
 								</h3>
 								<div class="best-sellers__price">
-									<span class="best-sellers__price--sale">₴1,424.00</span>
-									<span class="best-sellers__price--compare">₴1,424.00</span>
+									{% if product.compare_at_price > product.price %}
+										<span class="best-sellers__price--sale">{{ product.price | money }}</span>
+										<span class="best-sellers__price--compare">{{ product.compare_at_price | money }}</span>
+									{% else %}
+										<span class="best-sellers__price--regular">{{ product.price | money }}</span>
+									{% endif %}
 								</div>
 							</div>
 						{% else %}
