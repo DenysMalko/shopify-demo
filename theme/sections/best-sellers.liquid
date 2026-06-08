@@ -3,25 +3,37 @@
 		{% comment %} Left Column {% endcomment %}
 		<div class="best-sellers__column--left">
 			{% comment %} Titles {% endcomment %}
-			<h5 class="best-sellers__subtitle">
-				{{ section.settings.section_label }}
-			</h5>
-			<h4 class="best-sellers__title">
-				{{ section.settings.title }}
-			</h4>
+			{% if section.settings.section_label != blank %}
+				<p class="best-sellers__subtitle">
+					{{ section.settings.section_label }}
+				</p>
+			{% endif %}
+			{% if section.settings.title != blank %}
+				<h2 class="best-sellers__title">
+					{{ section.settings.title }}
+				</h2>
+			{% endif %}
 
 			{% comment %} Navigation {% endcomment %}
-    		<div class="best-sellers__nav">
-      			<ul>
-        			{% for block in section.blocks %}
-          				{% assign collection = collections[block.settings.collection] %}
-          				<li class="best-sellers__item{% if forloop.first %} is-active{% endif %}" data-block-id="{{ block.id }}">
-	            			{{ block.settings.collection_title | default: collection.title }}
-							{% render 'icon-arrow-right' %}
-    	      			</li>
-        			{% endfor %}
-      			</ul>
-    		</div>
+			<div class="best-sellers__nav">
+				<ul class="best-sellers__list">
+					{% for block in section.blocks %}
+						{% assign collection = collections[block.settings.collection] %}
+						<li>
+							<button
+								type="button"
+								class="best-sellers__item{% if forloop.first %} is-active{% endif %}"
+								data-best-sellers-item
+								data-block-id="{{ block.id }}"
+								aria-pressed="{% if forloop.first %}true{% else %}false{% endif %}"
+							>
+								<span>{{ block.settings.collection_title | default: collection.title }}</span>
+								{% render 'icon-arrow-right' %}
+							</button>
+						</li>
+					{% endfor %}
+				</ul>
+			</div>
 		</div>
 		
 		{% comment %} Right column {% endcomment %}
@@ -36,22 +48,24 @@
 						{% assign product = collection.products.first %}
 					{% endif %}
 
-					<div class="best-sellers__panel{% if forloop.first %} is-active{% endif %}" data-block-id="{{ block.id }}">
+					<div class="best-sellers__panel{% if forloop.first %} is-active{% endif %}" data-best-sellers-panel data-block-id="{{ block.id }}">
 						{% if product %}
 							{% comment %} Product Image {% endcomment %}
 							<a href="{{ product.url }}" class="best-sellers__image">
 								{% if product.featured_image %}
 									<picture>
-										<source 
-											media="(max-width: 480px)" 
-											srcset="{{ product.featured_image | img_url: '300x' }} 1x, {{ product.featured_image | img_url: '600x' }} 2x" 
+										<source
+											media="(max-width: 480px)"
+											srcset="{{ product.featured_image | image_url: width: 300 }} 1x, {{ product.featured_image | image_url: width: 600 }} 2x"
 										/>
-										<img 
-											height="auto" 
-											width="100%" 
-											src="{{ product.featured_image | img_url: '600x' }}" 
-											srcset="{{ product.featured_image | img_url: '600x' }} 1x, {{ product.featured_image | img_url: '1200x' }} 2x" 
-											alt="{{ product.title }}"
+										<img
+											height="{{ product.featured_image.height }}"
+											width="{{ product.featured_image.width }}"
+											src="{{ product.featured_image | image_url: width: 900 }}"
+											srcset="{{ product.featured_image | image_url: width: 900 }} 1x, {{ product.featured_image | image_url: width: 1800 }} 2x"
+											sizes="(min-width: 750px) 50vw, calc(100vw - 160px)"
+											alt="{{ product.title | escape }}"
+											loading="lazy"
 										/>
 									</picture>
 								{% else %}
@@ -63,22 +77,30 @@
 								<div class="best-sellers__tags">
 									{% assign display_tags = product.tags | slice: 0, 3 %}
 									{% for tag in display_tags %}
-										<span class="best-sellers__tag{% if tag == 'Sale' %} best-sellers__tag--sale{% endif %}">{{ tag }}</span>
+										{% assign normalized_tag = tag | downcase %}
+										<span class="best-sellers__tag{% if normalized_tag == 'sale' %} best-sellers__tag--sale{% endif %}">{{ tag }}</span>
 									{% endfor %}
 								</div>
 							{% endif %}
 							{% comment %} Product Actions {% endcomment %}
 							<div class="best-sellers__actions">
 								{% comment %} Wishlist {% endcomment %}
-								<a class="best-sellers__action best-sellers__action--wishlist" href="#" data-product-title="{{ product.title | escape }}">
+								<button
+									type="button"
+									class="best-sellers__action best-sellers__action--wishlist"
+									aria-label="Add {{ product.title | escape }} to wishlist"
+									data-wishlist-trigger
+									data-product-title="{{ product.title | escape }}"
+								>
 									{% render 'icon-wishlist' %}
-								</a>
+								</button>
 								{% comment %} Add to Cart {% endcomment %}
 								{% assign first_available_variant = product.selected_or_first_available_variant %}
 								<button
 									type="button"
 									class="best-sellers__action best-sellers__action--quick-view"
 									aria-label="Add to cart"
+									data-quick-view-trigger
 									data-variant-id="{{ first_available_variant.id }}"
 									{% unless product.available %}disabled{% endunless %}
 								>
@@ -109,14 +131,14 @@
   	</div>
 
 	{% comment %} Wishlist block {% endcomment %}
-	<div class="best-sellers__wishlist-modal" aria-hidden="true">
-		<div class="best-sellers__wishlist-overlay" data-wishlist-close>&nbsp;</div>
+	<div class="best-sellers__wishlist-modal" aria-hidden="true" data-wishlist-modal>
+		<div class="best-sellers__wishlist-overlay" data-wishlist-close></div>
 		<div class="best-sellers__wishlist-popup" role="dialog" aria-modal="true">
 			<button type="button" class="best-sellers__wishlist-close" aria-label="Close" data-wishlist-close>
 				{% render 'icon-close' %}
 			</button>
 			<p class="best-sellers__wishlist-message">
-				<span class="best-sellers__wishlist-product"></span> has been added to the your wishlist.
+				<span class="best-sellers__wishlist-product" data-wishlist-product></span> has been added to the your wishlist.
 			</p>
 		</div>
 	</div>
@@ -125,17 +147,13 @@
 {% comment %} Scripts {% endcomment %}
 <script>
 	(function(){
-		var bestSellersSection = document.getElementById('best-sellers-{{ section.id }}');
+		const bestSellersSection = document.getElementById('best-sellers-{{ section.id }}');
 		if (!bestSellersSection) return;
 		
-		// Vars
-		var items = bestSellersSection.querySelectorAll('.best-sellers__item');
-		var panels = bestSellersSection.querySelectorAll('.best-sellers__panel');
-		var wishlistButtons = bestSellersSection.querySelectorAll('.best-sellers__action--wishlist');
-		var quickViewButtons = bestSellersSection.querySelectorAll('.best-sellers__action--quick-view');
-		var wishlistModal = bestSellersSection.querySelector('.best-sellers__wishlist-modal');
-		var wishlistProduct = bestSellersSection.querySelector('.best-sellers__wishlist-product');
-		var wishlistCloseButtons = bestSellersSection.querySelectorAll('[data-wishlist-close]');
+		const items = bestSellersSection.querySelectorAll('[data-best-sellers-item]');
+		const panels = bestSellersSection.querySelectorAll('[data-best-sellers-panel]');
+		const wishlistModal = bestSellersSection.querySelector('[data-wishlist-modal]');
+		const wishlistProduct = bestSellersSection.querySelector('[data-wishlist-product]');
 
 		// Open wishlist modal
 		function openWishlistModal(productTitle) {
@@ -160,6 +178,7 @@
 		function activatePanel(id) {
 			items.forEach(function(item) { 
 				item.classList.toggle('is-active', item.getAttribute('data-block-id') === id); 
+				item.setAttribute('aria-pressed', item.getAttribute('data-block-id') === id ? 'true' : 'false');
 			});
 			panels.forEach(function(panel) { 
 				panel.classList.toggle('is-active', panel.getAttribute('data-block-id') === id); 
@@ -169,54 +188,52 @@
 		// Loop for all panels
 		if (items.length) {
 			activatePanel(items[0].getAttribute('data-block-id'));
-			items.forEach(function(item) {
-				item.addEventListener('click', function() {
-					var id = this.getAttribute('data-block-id');
-					if (!this.classList.contains('is-active')) activatePanel(id);
-				});
-			});
 		}
 
-		// Open wishlist
-		wishlistButtons.forEach(function(cta) {
-			cta.addEventListener('click', function(event) {
-				event.preventDefault();
-				openWishlistModal(this.getAttribute('data-product-title'));
-			});
-		});
+		bestSellersSection.addEventListener('click', function(event) {
+			const navItem = event.target.closest('[data-best-sellers-item]');
+			if (navItem && bestSellersSection.contains(navItem)) {
+				const id = navItem.getAttribute('data-block-id');
+				if (!navItem.classList.contains('is-active')) activatePanel(id);
+				return;
+			}
 
-		// Close wishlist
-		wishlistCloseButtons.forEach(function(cta) {
-			cta.addEventListener('click', function() {
+			const wishlistTrigger = event.target.closest('[data-wishlist-trigger]');
+			if (wishlistTrigger && bestSellersSection.contains(wishlistTrigger)) {
+				openWishlistModal(wishlistTrigger.getAttribute('data-product-title'));
+				return;
+			}
+
+			const wishlistClose = event.target.closest('[data-wishlist-close]');
+			if (wishlistClose && bestSellersSection.contains(wishlistClose)) {
 				closeWishlistModal();
-			});
-		});
+				return;
+			}
 
-		// Add to cart
-		quickViewButtons.forEach(function(cta) {
-			cta.addEventListener('click', function() {
-				var variantId = this.getAttribute('data-variant-id');
-				if (!variantId || this.disabled) return;
+			const quickViewTrigger = event.target.closest('[data-quick-view-trigger]');
+			if (!quickViewTrigger || !bestSellersSection.contains(quickViewTrigger)) return;
 
-				this.disabled = true;
-				this.classList.add('is-loading');
+			const variantId = quickViewTrigger.getAttribute('data-variant-id');
+			if (!variantId || quickViewTrigger.disabled) return;
 
-				fetch('{{ routes.cart_add_url }}.js', {
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-						'Accept': 'application/json'
-					},
-					body: JSON.stringify({
-						id: Number(variantId),
-						quantity: 1
-					})
-				}).catch(function(error) {
-					console.error(error);
-				}).finally(function() {
-					cta.disabled = false;
-					cta.classList.remove('is-loading');
-				});
+			quickViewTrigger.disabled = true;
+			quickViewTrigger.classList.add('is-loading');
+
+			fetch('{{ routes.cart_add_url }}.js', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					'Accept': 'application/json'
+				},
+				body: JSON.stringify({
+					id: Number(variantId),
+					quantity: 1
+				})
+			}).catch(function(error) {
+				console.error(error);
+			}).finally(function() {
+				quickViewTrigger.disabled = false;
+				quickViewTrigger.classList.remove('is-loading');
 			});
 		});
 	})();
@@ -259,7 +276,7 @@
 		padding: 0;
 	}
 
-	.best-sellers__nav ul {
+	.best-sellers__list {
 		font-size: 22px;
 		font-weight: 500;
 		line-height: 28px;
@@ -268,23 +285,38 @@
 		padding: 0;
 	}
 
+	.best-sellers__nav li {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+
 	.best-sellers__nav .best-sellers__item {
 		align-items: center;
+		appearance: none;
+		background: transparent;
 		border-bottom: 1px #dcdcdc solid;
+		border-left: 0;
+		border-right: 0;
+		border-top: 0;
+		color: inherit;
 		cursor: pointer;
 		display: flex;
+		font: inherit;
 		justify-content: space-between;
 		gap: 24px;
 		padding: 24px 0 23px;
+		text-align: left;
 		transition: all 0.2s ease-in-out;
+		width: 100%;
 	}
 
-	.best-sellers__nav ul:hover .best-sellers__item {
+	.best-sellers__list:hover .best-sellers__item {
 		border-color: #dcdcdc;
 		color: #dcdcdc;
 	}
 
-	.best-sellers__nav ul:hover .best-sellers__item:hover,
+	.best-sellers__list:hover .best-sellers__item:hover,
 	.best-sellers__nav .best-sellers__item:hover {
 		border-color: #292929;
 		color: #000;
@@ -308,6 +340,10 @@
 	.best-sellers__image img {
 		aspect-ratio: 1 / 1;
 		border-radius: 16px;
+		display: block;
+		height: auto;
+		object-fit: cover;
+		width: 100%;
 	}
 
 	.best-sellers__tags {
@@ -452,6 +488,10 @@
 		position: fixed;
 	}
 
+	.best-sellers__wishlist-overlay:empty {
+		display: block;
+	}
+
 	.best-sellers__wishlist-popup {
 		background: #fff;
 		border-radius: 16px;
@@ -517,7 +557,7 @@
 			padding: 0 64px;
 		}
 
-		.best-sellers__nav ul {
+		.best-sellers__list {
 			font-size: 28px;
 			line-height: 34px;
 		}
