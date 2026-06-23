@@ -1,0 +1,318 @@
+[data-product-list] .absolute {
+  position: absolute
+}
+
+[data-product-list] .relative {
+  position: relative
+}
+
+[data-product-list] .inset-0 {
+  inset: 0px
+}
+
+[data-product-list] .left-7 {
+  left: 1.75rem
+}
+
+[data-product-list] .top-7 {
+  top: 1.75rem
+}
+
+[data-product-list] .left-8 {
+  left: 2rem
+}
+
+[data-product-list] .top-8 {
+  top: 2rem
+}
+
+[data-product-list] .z-10 {
+  z-index: 10
+}
+
+[data-product-list] .m-0 {
+  margin: 0px
+}
+
+[data-product-list] .mb-4 {
+  margin-bottom: 1rem
+}
+
+[data-product-list] .block {
+  display: block
+}
+
+[data-product-list] .inline-block {
+  display: inline-block
+}
+
+[data-product-list] .flex {
+  display: flex
+}
+
+[data-product-list] .grid {
+  display: grid
+}
+
+[data-product-list] .hidden {
+  display: none
+}
+
+[data-product-list] .aspect-\[3\/4\] {
+  aspect-ratio: 3/4
+}
+
+[data-product-list] .h-8 {
+  height: 2rem
+}
+
+[data-product-list] .h-auto {
+  height: auto
+}
+
+[data-product-list] .h-full {
+  height: 100%
+}
+
+[data-product-list] .min-h-\[260px\] {
+  min-height: 260px
+}
+
+[data-product-list] .w-8 {
+  width: 2rem
+}
+
+[data-product-list] .w-full {
+  width: 100%
+}
+
+[data-product-list] .cursor-pointer {
+  cursor: pointer
+}
+
+[data-product-list] .grid-cols-1 {
+  grid-template-columns: repeat(1, minmax(0, 1fr))
+}
+
+[data-product-list] .flex-row-reverse {
+  flex-direction: row-reverse
+}
+
+[data-product-list] .flex-col {
+  flex-direction: column
+}
+
+[data-product-list] .flex-col-reverse {
+  flex-direction: column-reverse
+}
+
+[data-product-list] .flex-wrap {
+  flex-wrap: wrap
+}
+
+[data-product-list] .place-items-center {
+  place-items: center
+}
+
+[data-product-list] .items-center {
+  align-items: center
+}
+
+[data-product-list] .justify-end {
+  justify-content: flex-end
+}
+
+[data-product-list] .gap-2 {
+  gap: 0.5rem
+}
+
+[data-product-list] .gap-3 {
+  gap: 0.75rem
+}
+
+[data-product-list] .gap-6 {
+  gap: 1.5rem
+}
+
+[data-product-list] .overflow-hidden {
+  overflow: hidden
+}
+
+[data-product-list] .rounded-full {
+  border-radius: 9999px
+}
+
+[data-product-list] .rounded-md {
+  border-radius: 0.375rem
+}
+
+[data-product-list] .rounded-xl {
+  border-radius: 0.75rem
+}
+
+[data-product-list] .border {
+  border-width: 1px
+}
+
+[data-product-list] .border-0 {
+  border-width: 0px
+}
+
+[data-product-list] .border-solid {
+  border-style: solid
+}
+
+[data-product-list] .border-dashed {
+  border-style: dashed
+}
+
+[data-product-list] .border-borders {
+  --tw-border-opacity: 1;
+  border-color: rgb(232 232 232 / var(--tw-border-opacity, 1))
+}
+
+[data-product-list] .border-sale {
+  --tw-border-opacity: 1;
+  border-color: rgb(255 0 0 / var(--tw-border-opacity, 1))
+}
+
+[data-product-list] .bg-\[\#f6f2eb\] {
+  --tw-bg-opacity: 1;
+  background-color: rgb(246 242 235 / var(--tw-bg-opacity, 1))
+}
+
+[data-product-list] .bg-white {
+  --tw-bg-opacity: 1;
+  background-color: rgb(255 255 255 / var(--tw-bg-opacity, 1))
+}
+
+[data-product-list] .object-cover {
+  -o-object-fit: cover;
+     object-fit: cover
+}
+
+[data-product-list] .p-6 {
+  padding: 1.5rem
+}
+
+[data-product-list] .p-8 {
+  padding: 2rem
+}
+
+[data-product-list] .px-4 {
+  padding-left: 1rem;
+  padding-right: 1rem
+}
+
+[data-product-list] .py-1 {
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem
+}
+
+[data-product-list] .text-center {
+  text-align: center
+}
+
+[data-product-list] .font-franklin {
+  font-family: Franklin Gothic ATF, Arial, sans-serif
+}
+
+[data-product-list] .text-sm {
+  font-size: 14px;
+  line-height: 20px
+}
+
+[data-product-list] .font-medium {
+  font-weight: 500
+}
+
+[data-product-list] .font-semibold {
+  font-weight: 600
+}
+
+[data-product-list] .leading-7 {
+  line-height: 1.75rem
+}
+
+[data-product-list] .leading-3 {
+  line-height: .75rem
+}
+
+[data-product-list] .leading-10 {
+  line-height: 2.5rem
+}
+
+[data-product-list] .leading-9 {
+  line-height: 2.25rem
+}
+
+[data-product-list] .text-muted {
+  --tw-text-opacity: 1;
+  color: rgb(17 17 17 / var(--tw-text-opacity, 1))
+}
+
+[data-product-list] .text-primary {
+  --tw-text-opacity: 1;
+  color: rgb(10 72 116 / var(--tw-text-opacity, 1))
+}
+
+[data-product-list] .text-sale {
+  --tw-text-opacity: 1;
+  color: rgb(255 0 0 / var(--tw-text-opacity, 1))
+}
+
+[data-product-list] .no-underline {
+  text-decoration-line: none
+}
+
+[data-product-list] .opacity-0 {
+  opacity: 0
+}
+
+[data-product-list] .transition-opacity {
+  transition-property: opacity;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms
+}
+
+[data-product-list] .duration-200 {
+  transition-duration: 200ms
+}
+
+[data-product-list] .hover\:underline:hover {
+  text-decoration-line: underline
+}
+
+[data-product-list] :is(.group\/card:hover .group-hover\/card\:opacity-0) {
+  opacity: 0
+}
+
+[data-product-list] :is(.group\/card:hover .group-hover\/card\:opacity-100) {
+  opacity: 1
+}
+
+@media (min-width: 768px) {
+  [data-product-list] .md\:mb-8 {
+    margin-bottom: 2rem
+  }
+
+  [data-product-list] .md\:grid-cols-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr))
+  }
+}
+
+[data-product-list] .\[\&\.active\]\:outline.active {
+  outline-style: solid
+}
+
+[data-product-list] .\[\&\.active\]\:outline-1.active {
+  outline-width: 1px
+}
+
+[data-product-list] .\[\&\.active\]\:outline-offset-1.active {
+  outline-offset: 1px
+}
+
+[data-product-list] .\[\&\.active\]\:outline-primary.active {
+  outline-color: #0A4874
+}
