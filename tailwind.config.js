@@ -26,7 +26,7 @@ module.exports = {
         primary: '#0A4874',
         borders: '#e8e8e8',
         sale: '#FF0000',
-        muted: '#111111',
+        title: '#111111',
       },
       fontFamily: {
         sans: ['var(--font-body-family)', 'Arial', 'sans-serif'],

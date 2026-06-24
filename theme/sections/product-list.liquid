@@ -38,6 +38,11 @@
                         endif
 
                         assign secondary_media = secondary_media | default: product.media[1] | default: primary_media
+                        assign has_secondary_media = false
+
+                        if secondary_media != blank and secondary_media.id != primary_media.id
+                            assign has_secondary_media = true
+                        endif
 
                         for option in product.options_with_values
                             assign option_name = option.name | downcase
@@ -51,11 +56,12 @@
                     <article class="bg-white relative flex flex-col gap-6 p-6 rounded-md" data-product-card>
                         <a href="{{ product.url }}" class="group/card relative block overflow-hidden border border-borders border-solid rounded-xl" aria-label="{{ product.title | escape }}">
                             {% comment %} Sale {% endcomment %}
-                            {%- if product.compare_at_price > product.price -%}
-                                <span class="font-franklin inline-block leading-9 absolute left-8 top-8 z-10 bg-white border border-sale border-solid rounded-full px-4 py-1 text-md font-medium text-sale">
-                                    {{- 'products.product.on_sale' | t -}}
-                                </span>
-                            {%- endif -%}
+                            <span
+                                class="font-franklin inline-block leading-9 absolute left-8 top-8 z-[2] bg-white border border-sale border-solid rounded-full px-4 py-1 font-medium text-sale{% unless selected_variant.compare_at_price > selected_variant.price %} hidden{% endunless %}"
+                                data-product-sale-badge
+                            >
+                                {{- 'products.product.on_sale' | t -}}
+                            </span>
                             
                             {%- if primary_media != blank -%}
                                 <img
@@ -65,12 +71,12 @@
                                         {{ primary_media | image_url: width: 760 }} 760w,
                                         {{ primary_media | image_url: width: 1120 }} 1120w
                                     "
-                                    sizes="(min-width: 768px) 33vw, 100vw"
+                                    sizes="(min-width: 1600px) 436px, (min-width: 768px) calc(33.333vw - 97.333px), (min-width: 750px) calc(100vw - 148px), calc(100vw - 78px)"
                                     width="{{ primary_media.width }}"
                                     height="{{ primary_media.height }}"
                                     alt="{{ primary_media.alt | default: product.title | escape }}"
                                     loading="lazy"
-                                    class="aspect-[3/4] h-auto w-full object-cover transition-opacity duration-200 group-hover/card:opacity-0"
+                                    class="aspect-[3/4] h-auto w-full object-cover transition-opacity duration-200{% if has_secondary_media %} group-hover/card:opacity-0{% endif %}"
                                     data-product-primary-image
                                 >
 
@@ -81,103 +87,130 @@
                                         {{ secondary_media | image_url: width: 760 }} 760w,
                                         {{ secondary_media | image_url: width: 1120 }} 1120w
                                     "
-                                    sizes="(min-width: 768px) 33vw, 100vw"
+                                    sizes="(min-width: 1600px) 436px, (min-width: 768px) calc(33.333vw - 97.333px), (min-width: 750px) calc(100vw - 148px), calc(100vw - 78px)"
                                     width="{{ secondary_media.width }}"
                                     height="{{ secondary_media.height }}"
                                     alt="{{ secondary_media.alt | default: product.title | escape }}"
                                     loading="lazy"
-                                    class="absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity duration-200 group-hover/card:opacity-100"
+                                    class="absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity duration-200{% if has_secondary_media %} group-hover/card:opacity-100{% endif %}"
                                     data-product-hover-image
                                 >
                             {%- else -%}
-                                {{ 'product-1' | placeholder_svg_tag: 'aspect-[3/4] w-full bg-[#f6f2eb]' }}
+                                {{ 'product-1' | placeholder_svg_tag: 'aspect-[3/4] w-full' }}
                             {%- endif -%}
                         </a>
 
                         <div class="grid gap-6">
                             {% comment %} Swatches {% endcomment %}
                             {%- if color_option != blank -%}
-                                <div class="flex flex-wrap gap-3" aria-label="{{ color_option.name | escape }}">
-                                    {%- for value in color_option.values -%}
-                                        {%- liquid
-                                            assign swatch_variant = blank
+                                <fieldset class="m-0 border-0 p-0">
+                                    <legend class="visually-hidden">{{ color_option.name | escape }}</legend>
+                                    <div class="flex flex-wrap gap-3">
+                                        {%- for value in color_option.values -%}
+                                            {%- liquid
+                                                assign swatch_variant = value.variant | default: selected_variant
+                                                assign swatch_media = swatch_variant.featured_media | default: primary_media
+                                                assign swatch_hover_media = blank
+                                                assign found_swatch_media = false
 
-                                            for variant in product.variants
-                                                if variant.options contains value
-                                                    assign swatch_variant = variant
-                                                    break
+                                                if swatch_media != blank
+                                                    for media in product.media
+                                                        if found_swatch_media and media.id != swatch_media.id
+                                                            assign swatch_hover_media = media
+                                                            break
+                                                        endif
+
+                                                        if media.id == swatch_media.id
+                                                            assign found_swatch_media = true
+                                                        endif
+                                                    endfor
                                                 endif
-                                            endfor
 
-                                            assign swatch_variant = swatch_variant | default: selected_variant
-                                            assign swatch_media = swatch_variant.featured_media | default: primary_media
-                                            assign swatch_hover_media = blank
-                                            assign found_swatch_media = false
+                                                assign swatch_hover_media = swatch_hover_media | default: product.media[1] | default: swatch_media
+                                                assign has_swatch_hover_media = false
 
-                                            if swatch_media != blank
-                                                for media in product.media
-                                                    if found_swatch_media and media.id != swatch_media.id
-                                                        assign swatch_hover_media = media
-                                                        break
-                                                    endif
+                                                if swatch_hover_media != blank and swatch_hover_media.id != swatch_media.id
+                                                    assign has_swatch_hover_media = true
+                                                endif
 
-                                                    if media.id == swatch_media.id
-                                                        assign found_swatch_media = true
-                                                    endif
-                                                endfor
-                                            endif
+                                                assign swatch_color = value.name | downcase | replace: ' ', ''
+                                            -%}
 
-                                            assign swatch_hover_media = swatch_hover_media | default: product.media[1] | default: swatch_media
-                                            assign swatch_color = value | downcase | replace: ' ', ''
-                                        -%}
-
-                                        <button
-                                            type="button"
-                                            class="cursor-pointer h-8 w-8 rounded-full bg-white border-0 [&.active]:outline [&.active]:outline-1 [&.active]:outline-primary [&.active]:outline-offset-1{% if forloop.first %} active{% endif %}"
-                                            style="background-color: {{ swatch_color }};"
-                                            aria-label="{{ value | escape }}"
-                                            aria-pressed="{% if forloop.first %}true{% else %}false{% endif %}"
-                                            data-product-swatch
-                                            data-price="{{ swatch_variant.price | money | escape }}"
-                                            {% if swatch_variant.compare_at_price > swatch_variant.price %}
-                                                data-compare-price="{{ swatch_variant.compare_at_price | money | escape }}"
-                                            {% endif %}
-                                            {% if swatch_media != blank %}
-                                                data-primary-src="{{ swatch_media | image_url: width: 760 }}"
-                                                data-primary-srcset="{{ swatch_media | image_url: width: 420 }} 420w, {{ swatch_media | image_url: width: 760 }} 760w, {{ swatch_media | image_url: width: 1120 }} 1120w"
-                                                data-primary-alt="{{ swatch_media.alt | default: product.title | escape }}"
-                                            {% endif %}
-                                            {% if swatch_hover_media != blank %}
-                                                data-hover-src="{{ swatch_hover_media | image_url: width: 760 }}"
-                                                data-hover-srcset="{{ swatch_hover_media | image_url: width: 420 }} 420w, {{ swatch_hover_media | image_url: width: 760 }} 760w, {{ swatch_hover_media | image_url: width: 1120 }} 1120w"
-                                                data-hover-alt="{{ swatch_hover_media.alt | default: product.title | escape }}"
-                                            {% endif %}
-                                        ></button>
-                                    {%- endfor -%}
-                                </div>
+                                            <button
+                                                type="button"
+                                                class="cursor-pointer h-8 w-8 rounded-full bg-white border-0 [&.active]:outline [&.active]:outline-1 [&.active]:outline-primary [&.active]:outline-offset-1{% if value.selected %} active{% endif %}"
+                                                style="background-color: {{ swatch_color }};"
+                                                aria-label="{{ value.name | escape }}"
+                                                aria-pressed="{{ value.selected }}"
+                                                data-product-swatch
+                                                data-price="{{ swatch_variant.price | money | escape }}"
+                                                data-has-hover="{{ has_swatch_hover_media }}"
+                                                {% if swatch_variant.compare_at_price > swatch_variant.price %}
+                                                    data-compare-price="{{ swatch_variant.compare_at_price | money | escape }}"
+                                                {% endif %}
+                                                {% if swatch_media != blank %}
+                                                    data-primary-src="{{ swatch_media | image_url: width: 760 }}"
+                                                    data-primary-srcset="{{ swatch_media | image_url: width: 420 }} 420w, {{ swatch_media | image_url: width: 760 }} 760w, {{ swatch_media | image_url: width: 1120 }} 1120w"
+                                                    data-primary-alt="{{ swatch_media.alt | default: product.title | escape }}"
+                                                {% endif %}
+                                                {% if has_swatch_hover_media %}
+                                                    data-hover-src="{{ swatch_hover_media | image_url: width: 760 }}"
+                                                    data-hover-srcset="{{ swatch_hover_media | image_url: width: 420 }} 420w, {{ swatch_hover_media | image_url: width: 760 }} 760w, {{ swatch_hover_media | image_url: width: 1120 }} 1120w"
+                                                    data-hover-alt="{{ swatch_hover_media.alt | default: product.title | escape }}"
+                                                {% endif %}
+                                            ></button>
+                                        {%- endfor -%}
+                                    </div>
+                                </fieldset>
                             {%- endif -%}
 
                             <div class="grid gap-2">
                                 {% comment %} Vendor {% endcomment %}
                                 {%- if product.vendor != blank -%}
-                                    <p class="text-sm text-muted leading-7 m-0">
+                                    <p class="text-sm text-title leading-7 m-0">
                                         {{ product.vendor | escape }}
                                     </p>
                                 {%- endif -%}
 
                                 {% comment %} Title {% endcomment %}
-                                <a href="{{ product.url }}" class="text-md text-primary font-medium inline-block leading-7 no-underline hover:underline">
+                                <a href="{{ product.url }}" class="text-primary font-medium inline-block leading-7 no-underline hover:underline">
                                     {{ product.title | escape }}
                                 </a>
 
                                 {% comment %} Price {% endcomment %}
-                                <div class="flex items-center gap-2 text-sm text-muted leading-7 flex-row-reverse justify-end">
+                                <div
+                                    class="flex items-center gap-2 text-sm text-title leading-7 flex-row-reverse justify-end"
+                                    aria-live="polite"
+                                    aria-atomic="true"
+                                >
                                     {%- if selected_variant.compare_at_price > selected_variant.price -%}
-                                        <span class="text-sale" data-product-price>{{ selected_variant.price | money }}</span>
-                                        <s class="text-muted" data-product-compare-price>{{ selected_variant.compare_at_price | money }}</s>
+                                        <span class="text-sale" data-product-price>
+                                            <span class="visually-hidden hidden" data-product-regular-price-label>
+                                                {{- 'products.product.price.regular_price' | t -}}
+                                            </span>
+                                            <span class="visually-hidden" data-product-sale-price-label>
+                                                {{- 'products.product.price.sale_price' | t -}}
+                                            </span>
+                                            <span data-product-price-value>{{ selected_variant.price | money }}</span>
+                                        </span>
+                                        <s class="text-title" data-product-compare-price>
+                                            <span class="visually-hidden">{{ 'products.product.price.regular_price' | t }}</span>
+                                            <span data-product-compare-price-value>{{ selected_variant.compare_at_price | money }}</span>
+                                        </s>
                                     {%- else -%}
-                                        <span data-product-price>{{ selected_variant.price | money }}</span>
-                                        <s class="hidden text-muted" data-product-compare-price></s>
+                                        <span data-product-price>
+                                            <span class="visually-hidden" data-product-regular-price-label>
+                                                {{- 'products.product.price.regular_price' | t -}}
+                                            </span>
+                                            <span class="visually-hidden hidden" data-product-sale-price-label>
+                                                {{- 'products.product.price.sale_price' | t -}}
+                                            </span>
+                                            <span data-product-price-value>{{ selected_variant.price | money }}</span>
+                                        </span>
+                                        <s class="hidden text-title" data-product-compare-price>
+                                            <span class="visually-hidden">{{ 'products.product.price.regular_price' | t }}</span>
+                                            <span data-product-compare-price-value></span>
+                                        </s>
                                     {%- endif -%}
                                 </div>
                             </div>
@@ -186,8 +219,8 @@
                 {%- endfor -%}
             </div>
         {%- else -%}
-            <div class="grid min-h-[260px] place-items-center border border-dashed border-line p-8 text-center text-muted">
-                Choose a collection to show product cards.
+            <div class="grid min-h-[260px] place-items-center border p-8 text-center text-title">
+                {{- 'products.product.choose_collection' | t -}}
             </div>
         {%- endif -%}
     </div>
@@ -198,57 +231,87 @@
         const root = document.getElementById('product-list-{{ section.id }}');
         if (!root) return;
 
-        root.querySelectorAll('[data-product-card]').forEach((card) => {
+        // Product card updating
+        const updateProductCard = (card, swatch) => {
+            // Init product swatch data
             const primaryImage = card.querySelector('[data-product-primary-image]');
             const hoverImage = card.querySelector('[data-product-hover-image]');
             const price = card.querySelector('[data-product-price]');
+            const priceValue = card.querySelector('[data-product-price-value]');
+            const regularPriceLabel = card.querySelector('[data-product-regular-price-label]');
+            const salePriceLabel = card.querySelector('[data-product-sale-price-label]');
             const comparePrice = card.querySelector('[data-product-compare-price]');
-            const swatches = Array.from(card.querySelectorAll('[data-product-swatch]'));
+            const comparePriceValue = card.querySelector('[data-product-compare-price-value]');
+            const saleBadge = card.querySelector('[data-product-sale-badge]');
+            const hasHover = swatch.dataset.hasHover === 'true';
+            const isOnSale = Boolean(swatch.dataset.comparePrice);
 
-            const updateProductCard = (swatch) => {
-                if (primaryImage && swatch.dataset.primarySrc) {
-                    primaryImage.src = swatch.dataset.primarySrc;
-                    primaryImage.srcset = swatch.dataset.primarySrcset;
-                    primaryImage.alt = swatch.dataset.primaryAlt;
-                }
-
-                if (hoverImage && swatch.dataset.hoverSrc) {
-                    hoverImage.src = swatch.dataset.hoverSrc;
-                    hoverImage.srcset = swatch.dataset.hoverSrcset;
-                    hoverImage.alt = swatch.dataset.hoverAlt;
-                }
-
-                if (price && swatch.dataset.price) {
-                    price.textContent = swatch.dataset.price;
-                    price.classList.toggle('font-semibold', Boolean(swatch.dataset.comparePrice));
-                    price.classList.toggle('text-sale', Boolean(swatch.dataset.comparePrice));
-                }
-
-                if (comparePrice) {
-                    comparePrice.textContent = swatch.dataset.comparePrice || '';
-                    comparePrice.classList.toggle('hidden', !swatch.dataset.comparePrice);
-                }
-            };
-
-            const activeSwatch = swatches.find((swatch) => swatch.classList.contains('active'));
-
-            if (activeSwatch) {
-                updateProductCard(activeSwatch);
+            if (primaryImage && swatch.dataset.primarySrc) {
+                primaryImage.src = swatch.dataset.primarySrc;
+                primaryImage.srcset = swatch.dataset.primarySrcset;
+                primaryImage.alt = swatch.dataset.primaryAlt;
             }
-            
-            swatches.forEach((swatch) => {
-                swatch.addEventListener('click', () => {
-                    swatches.forEach((item) => {
-                        item.classList.remove('active');
-                        item.setAttribute('aria-pressed', 'false');
-                    });
 
-                    swatch.classList.add('active');
-                    swatch.setAttribute('aria-pressed', 'true');
+            if (primaryImage) {
+                primaryImage.classList.toggle('group-hover/card:opacity-0', hasHover);
+            }
 
-                    updateProductCard(swatch);
-                });
+            if (hoverImage) {
+                hoverImage.classList.toggle('group-hover/card:opacity-100', hasHover);
+            }
+
+            if (hasHover && hoverImage && swatch.dataset.hoverSrc) {
+                hoverImage.src = swatch.dataset.hoverSrc;
+                hoverImage.srcset = swatch.dataset.hoverSrcset;
+                hoverImage.alt = swatch.dataset.hoverAlt;
+            }
+
+            if (price && priceValue && swatch.dataset.price) {
+                priceValue.textContent = swatch.dataset.price;
+                price.classList.toggle('text-sale', isOnSale);
+            }
+
+            if (regularPriceLabel && salePriceLabel) {
+                regularPriceLabel.classList.toggle('hidden', isOnSale);
+                salePriceLabel.classList.toggle('hidden', !isOnSale);
+            }
+
+            if (comparePrice && comparePriceValue) {
+                comparePriceValue.textContent = swatch.dataset.comparePrice || '';
+                comparePrice.classList.toggle('hidden', !isOnSale);
+            }
+
+            if (saleBadge) {
+                saleBadge.classList.toggle('hidden', !isOnSale);
+            }
+        };
+
+        root.querySelectorAll('[data-product-swatch].active').forEach((swatch) => {
+            const card = swatch.closest('[data-product-card]');
+
+            if (card) {
+                updateProductCard(card, swatch);
+            }
+        });
+
+        // Swatch event handler
+        root.addEventListener('click', (event) => {
+            const swatch = event.target instanceof Element
+                ? event.target.closest('[data-product-swatch]')
+                : null;
+
+            if (!swatch || !root.contains(swatch)) return;
+
+            const card = swatch.closest('[data-product-card]');
+            if (!card) return;
+
+            card.querySelectorAll('[data-product-swatch]').forEach((item) => {
+                const isActive = item === swatch;
+                item.classList.toggle('active', isActive);
+                item.setAttribute('aria-pressed', String(isActive));
             });
+
+            updateProductCard(card, swatch);
         });
     })();
 </script>
